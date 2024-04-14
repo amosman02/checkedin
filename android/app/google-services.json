@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "203546309238",
+    "project_id": "checkedin-f10bf",
+    "storage_bucket": "checkedin-f10bf.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:203546309238:android:ecbcb7a2eba4c60735a557",
+        "android_client_info": {
+          "package_name": "com.example.checkedin"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB8L6ThBhxNk02KYXZsW17mLD373QlAQew"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
