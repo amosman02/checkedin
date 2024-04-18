@@ -18,4 +18,5 @@ class AppColor {
       colors: [Colors.black.withOpacity(0.5), Colors.transparent],
       begin: Alignment.topCenter,
       end: Alignment.bottomCenter);
+  static Color warning = const Color(0xFF780000);
 }
