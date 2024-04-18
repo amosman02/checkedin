@@ -14,10 +14,30 @@ class LoginModal extends StatefulWidget {
 }
 
 class _LoginModalState extends State<LoginModal> {
-  var _enteredEmail = TextEditingController();
-  var _enteredPassword = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
+  var _enteredEmail = '';
+  var _enteredPassword = '';
 
-  void _submit() {}
+  void _submit() async {
+    final isValid = _formKey.currentState!.validate();
+
+    if (!isValid) {
+      return;
+    }
+
+    _formKey.currentState!.save();
+
+    try {
+      await _firebase.signInWithEmailAndPassword(
+          email: _enteredEmail, password: _enteredPassword);
+      if (!mounted) return;
+      Navigator.of(context).pop();
+    } on FirebaseAuthException catch (error) {
+      ScaffoldMessenger.of(context).clearSnackBars();
+      ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(error.message ?? 'Authentication failed!')));
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -66,6 +86,68 @@ class _LoginModalState extends State<LoginModal> {
                 ),
               ),
               // Form
+              Form(
+                key: _formKey,
+                child: Column(
+                  children: [
+                    CustomTextField(
+                      title: 'Email',
+                      hint: 'youremail@email.com',
+                      validator: (value) {
+                        if (value!.isEmpty) {
+                          return 'Email address is required';
+                        }
+                        if (!value.contains("@")) {
+                          return 'Enter a valid email address';
+                        }
+                        return null;
+                      },
+                      onSaved: (value) =>
+                          setState(() => _enteredEmail = value!),
+                    ),
+                    CustomTextField(
+                      title: 'Password',
+                      hint: '**********',
+                      obsecureText: true,
+                      margin: const EdgeInsets.only(top: 16),
+                      validator: (value) {
+                        if (value!.isEmpty) {
+                          return 'Password is required';
+                        }
+                        return null;
+                      },
+                      onSaved: (value) =>
+                          setState(() => _enteredPassword = value!),
+                    ),
+                    // Log in Button
+                    Container(
+                      margin: const EdgeInsets.only(top: 32, bottom: 6),
+                      width: MediaQuery.of(context).size.width,
+                      height: 60,
+                      child: ElevatedButton(
+                        onPressed: _submit,
+                        // () {
+                        //   Navigator.of(context).pop();
+                        //   Navigator.of(context).pushReplacement(
+                        //       MaterialPageRoute(
+                        //           builder: (context) => const PageSwitcher()));
+                        // },
+                        style: ElevatedButton.styleFrom(
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10)),
+                          backgroundColor: AppColor.primarySoft,
+                        ),
+                        child: Text('Login',
+                            style: TextStyle(
+                                color: AppColor.secondary,
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                                fontFamily: 'inter')),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
               // const CustomTextField(
               //   title: 'Email',
               //   hint: 'youremail@email.com',
@@ -75,30 +157,6 @@ class _LoginModalState extends State<LoginModal> {
               //     hint: '**********',
               //     obsecureText: true,
               //     margin: EdgeInsets.only(top: 16)),
-              // Log in Button
-              Container(
-                margin: const EdgeInsets.only(top: 32, bottom: 6),
-                width: MediaQuery.of(context).size.width,
-                height: 60,
-                child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                    Navigator.of(context).pushReplacement(MaterialPageRoute(
-                        builder: (context) => const PageSwitcher()));
-                  },
-                  style: ElevatedButton.styleFrom(
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10)),
-                    backgroundColor: AppColor.primarySoft,
-                  ),
-                  child: Text('Login',
-                      style: TextStyle(
-                          color: AppColor.secondary,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                          fontFamily: 'inter')),
-                ),
-              ),
               TextButton(
                 onPressed: () {},
                 style: TextButton.styleFrom(

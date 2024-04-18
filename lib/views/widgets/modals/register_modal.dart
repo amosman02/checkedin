@@ -1,6 +1,7 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:checkedin/views/screens/page_switcher.dart';
+// import 'package:checkedin/views/screens/page_switcher.dart';
 import 'package:checkedin/views/utils/AppColor.dart';
 import 'package:checkedin/views/widgets/custom_text_field.dart';
 import 'package:checkedin/views/widgets/modals/login_modal.dart';
@@ -30,8 +31,19 @@ class _RegisterModalState extends State<RegisterModal> {
     _formKey.currentState!.save();
 
     try {
-      await _firebase.createUserWithEmailAndPassword(
+      final userCredentials = await _firebase.createUserWithEmailAndPassword(
           email: _enteredEmail, password: _enteredPassword);
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(userCredentials.user!.uid)
+          .set({
+        'email': _enteredEmail,
+        'name': _enteredName,
+        'image_url':
+            'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png',
+      });
+      if (!mounted) return;
+      Navigator.of(context).pop();
     } on FirebaseAuthException catch (error) {
       ScaffoldMessenger.of(context).clearSnackBars();
       ScaffoldMessenger.of(context).showSnackBar(
