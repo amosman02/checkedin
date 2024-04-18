@@ -107,13 +107,13 @@ class WelcomePage extends StatelessWidget {
                             shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(10)),
                             side: BorderSide(
-                                color: AppColor.secondary.withOpacity(0.5),
+                                color: AppColor.whiteSoft.withOpacity(0.5),
                                 width: 1),
                           ),
                           child: Text(
                             'Log in',
                             style: TextStyle(
-                              color: AppColor.secondary,
+                              color: AppColor.whiteSoft,
                               fontSize: 16,
                               fontWeight: FontWeight.w600,
                               fontFamily: 'inter',
