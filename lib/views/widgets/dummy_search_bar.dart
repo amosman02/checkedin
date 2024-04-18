@@ -33,7 +33,7 @@ class DummySearchBar extends StatelessWidget {
                     Container(
                       margin: const EdgeInsets.only(left: 10),
                       child: Text(
-                        'What do you want to eat?',
+                        'Enter booking reference',
                         style: TextStyle(color: Colors.white.withOpacity(0.3)),
                       ),
                     )
@@ -42,16 +42,16 @@ class DummySearchBar extends StatelessWidget {
               ),
             ),
             // Right side - filter button
-            Container(
-              width: 50,
-              height: 50,
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10),
-                color: AppColor.secondary,
-              ),
-              child: SvgPicture.asset('assets/icons/filter.svg'),
-            )
+            // Container(
+            //   width: 50,
+            //   height: 50,
+            //   alignment: Alignment.center,
+            //   decoration: BoxDecoration(
+            //     borderRadius: BorderRadius.circular(10),
+            //     color: AppColor.secondary,
+            //   ),
+            //   child: SvgPicture.asset('assets/icons/filter.svg'),
+            // )
           ],
         ),
       ),
