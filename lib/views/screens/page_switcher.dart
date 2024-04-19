@@ -1,6 +1,5 @@
+import 'package:checkedin/views/screens/profile_page.dart';
 import 'package:flutter/material.dart';
-import 'package:checkedin/views/screens/bookmarks_page.dart';
-import 'package:checkedin/views/screens/explore_page.dart';
 import 'package:checkedin/views/screens/home_page.dart';
 import 'package:checkedin/views/utils/AppColor.dart';
 import 'package:checkedin/views/widgets/custom_bottom_navigation_bar.dart';
@@ -9,7 +8,7 @@ class PageSwitcher extends StatefulWidget {
   const PageSwitcher({super.key});
 
   @override
-  _PageSwitcherState createState() => _PageSwitcherState();
+  State<PageSwitcher> createState() => _PageSwitcherState();
 }
 
 class _PageSwitcherState extends State<PageSwitcher> {
@@ -29,8 +28,7 @@ class _PageSwitcherState extends State<PageSwitcher> {
         children: [
           [
             HomePage(),
-            ExplorePage(),
-            const BookmarksPage(),
+            const ProfilePage(),
           ][_selectedIndex],
           const BottomGradientWidget(),
         ],
