@@ -73,6 +73,16 @@ class SearchResult extends StatelessWidget {
               ),
             ],
           ),
+          const SizedBox(height: 16),
+          // Display the passenger name
+          Text(
+            'Passenger: $name',
+            style: const TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 16),
           // Display the departure and arrival information
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -120,15 +130,7 @@ class SearchResult extends StatelessWidget {
           ),
           // Display the flight duration
           Text(
-            'Flight Duration: $flightDurationTime minutes',
-            style: const TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          // Display the passenger name
-          Text(
-            'Passenger: $name',
+            'Flight Duration: ${int.parse(flightDurationTime) ~/ 60} hours ${int.parse(flightDurationTime) % 60 > 0 ? 'and ${int.parse(flightDurationTime) % 60} minutes' : ''}',
             style: const TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
@@ -147,7 +149,7 @@ class SearchResult extends StatelessWidget {
                 backgroundColor: AppColor.primarySoft,
               ),
               child: Text(
-                'Cofrim Flight',
+                'Confirm Flight',
                 style: TextStyle(
                     color: AppColor.secondary,
                     fontSize: 16,
