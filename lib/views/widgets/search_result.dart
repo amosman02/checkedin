@@ -1,8 +1,12 @@
-import 'package:checkedin/views/utils/AppColor.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:checkedin/views/widgets/modals/reservation_confirm_modal.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:intl/intl.dart';
 
-class SearchResult extends StatelessWidget {
+import 'package:checkedin/views/utils/AppColor.dart';
+
+class SearchResult extends StatefulWidget {
   final String airline;
   final String airlineLogo;
   final Timestamp arrivalTimestamp;
@@ -17,6 +21,7 @@ class SearchResult extends StatelessWidget {
   final String destinationCountry;
   final String flightDurationTime;
   final String name;
+  final String bookingReference;
 
   const SearchResult({
     super.key,
@@ -34,7 +39,58 @@ class SearchResult extends StatelessWidget {
     required this.destinationCountry,
     required this.flightDurationTime,
     required this.name,
+    required this.bookingReference,
   });
+
+  @override
+  State<SearchResult> createState() => _SearchResultState();
+}
+
+class _SearchResultState extends State<SearchResult> {
+  String formatDate(Timestamp timestamp) {
+    DateTime dateTime = timestamp.toDate();
+    String formattedDate = DateFormat('yyyy-MM-dd HH:mm').format(dateTime);
+    return formattedDate;
+  }
+
+  void confirmBooking() async {
+    final user = FirebaseAuth.instance.currentUser;
+    await FirebaseFirestore.instance
+        .collection('users_history')
+        .doc(user!.uid)
+        .collection('booking_details')
+        .doc(widget.bookingReference)
+        .set({
+      "name": widget.name,
+      "departure_timestamp": widget.departureTimestamp,
+      "airline": widget.airline,
+      "airline_logo": widget.airlineLogo,
+      "departure_city": widget.departureCity,
+      "departure_country": widget.departureCountry,
+      "departure_airport_name": widget.departureAirportName,
+      "departure_airport_code": widget.departureAirportCode,
+      "arrival_timestamp": widget.arrivalTimestamp,
+      "destination_city": widget.destinationCity,
+      "destination_country": widget.destinationCountry,
+      "destination_airport_name": widget.destinationAirportName,
+      "destination_airport_code": widget.departureAirportCode,
+      "flight_duration_time": widget.flightDurationTime,
+      "submission_date": Timestamp.now(),
+    });
+
+    if (!mounted) return;
+
+    showModalBottomSheet(
+        context: context,
+        backgroundColor: Colors.white,
+        isDismissible: false,
+        shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(20), topRight: Radius.circular(20))),
+        builder: (context) {
+          return const ReservationConfirmModal();
+        });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -60,23 +116,23 @@ class SearchResult extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                airline,
+                widget.airline,
                 style: const TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
                 ),
               ),
               Image.network(
-                airlineLogo,
-                width: 50,
-                height: 50,
+                widget.airlineLogo,
+                width: 70,
+                height: 70,
               ),
             ],
           ),
           const SizedBox(height: 16),
           // Display the passenger name
           Text(
-            'Passenger: $name',
+            'Passenger: ${widget.name}',
             style: const TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
@@ -95,13 +151,13 @@ class SearchResult extends StatelessWidget {
                 ),
               ),
               Text(
-                '$departureAirportName ($departureAirportCode) - $departureCity, $departureCountry',
+                '${widget.departureAirportName} (${widget.departureAirportCode}) - ${widget.departureCity}, ${widget.departureCountry}',
                 style: const TextStyle(
                   fontSize: 16,
                 ),
               ),
               Text(
-                'Departure Time: ${departureTimestamp.toDate()}',
+                'Departure Time: ${formatDate(widget.departureTimestamp)}',
                 style: const TextStyle(
                   fontSize: 16,
                 ),
@@ -115,13 +171,13 @@ class SearchResult extends StatelessWidget {
                 ),
               ),
               Text(
-                '$destinationAirportName ($destinationAirportCode) - $destinationCity, $destinationCountry',
+                '${widget.destinationAirportName} (${widget.destinationAirportCode}) - ${widget.destinationCity}, ${widget.destinationCountry}',
                 style: const TextStyle(
                   fontSize: 16,
                 ),
               ),
               Text(
-                'Arrival Time: ${arrivalTimestamp.toDate()}',
+                'Arrival Time: ${formatDate(widget.arrivalTimestamp)}',
                 style: const TextStyle(
                   fontSize: 16,
                 ),
@@ -130,7 +186,7 @@ class SearchResult extends StatelessWidget {
           ),
           // Display the flight duration
           Text(
-            'Flight Duration: ${int.parse(flightDurationTime) ~/ 60} hours ${int.parse(flightDurationTime) % 60 > 0 ? 'and ${int.parse(flightDurationTime) % 60} minutes' : ''}',
+            'Flight Duration: ${int.parse(widget.flightDurationTime) ~/ 60} hours ${int.parse(widget.flightDurationTime) % 60 > 0 ? 'and ${int.parse(widget.flightDurationTime) % 60} minutes' : ''}',
             style: const TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
@@ -142,7 +198,7 @@ class SearchResult extends StatelessWidget {
             width: MediaQuery.of(context).size.width,
             height: 60,
             child: ElevatedButton(
-              onPressed: () {},
+              onPressed: confirmBooking,
               style: ElevatedButton.styleFrom(
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10)),
@@ -151,7 +207,7 @@ class SearchResult extends StatelessWidget {
               child: Text(
                 'Confirm Flight',
                 style: TextStyle(
-                    color: AppColor.secondary,
+                    color: AppColor.whiteSoft,
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
                     fontFamily: 'inter'),
@@ -161,6 +217,5 @@ class SearchResult extends StatelessWidget {
         ],
       ),
     );
-    ;
   }
 }

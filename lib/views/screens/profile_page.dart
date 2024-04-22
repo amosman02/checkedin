@@ -56,176 +56,135 @@ class _ProfilePageState extends State<ProfilePage> {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder(
-        stream: FirebaseFirestore.instance
-            .collection('users')
-            .doc(FirebaseAuth.instance.currentUser!.uid)
-            .snapshots(),
-        builder: (ctx, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const CircularProgressIndicator();
-          }
+      stream: FirebaseFirestore.instance
+          .collection('users')
+          .doc(FirebaseAuth.instance.currentUser!.uid)
+          .snapshots(),
+      builder: (ctx, snapshot) {
+        if (!snapshot.hasData) {
+          return const Center(
+            child: Text('No Data found!'),
+          );
+        }
 
-          if (!snapshot.hasData) {
-            return const Center(
-              child: Text('No Data found!'),
-            );
-          }
+        if (snapshot.hasError) {
+          return const Center(
+            child: Text('Something went wrong'),
+          );
+        }
 
-          if (snapshot.hasError) {
-            return const Center(
-              child: Text('Something went wrong'),
-            );
-          }
+        final userData = snapshot.data!;
 
-          final userData = snapshot.data!;
-
-          return Scaffold(
-            appBar: AppBar(
-              // brightness: Brightness.dark,
-              backgroundColor: AppColor.primary,
-              elevation: 0,
-              centerTitle: true,
-              title: const Text('My Profile',
-                  style: TextStyle(
-                      fontFamily: 'inter',
-                      fontWeight: FontWeight.w400,
-                      fontSize: 16)),
-              leading: IconButton(
-                icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () {},
-                  style: TextButton.styleFrom(
-                    // primary: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(100),
-                    ),
-                  ),
-                  child: const Text(
-                    'Edit',
-                    style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600),
-                  ),
-                ),
-              ],
+        return Scaffold(
+          appBar: AppBar(
+            backgroundColor: AppColor.primary,
+            iconTheme: IconThemeData(color: AppColor.whiteSoft),
+            elevation: 0,
+            centerTitle: true,
+            title: Text(
+              'My Profile',
+              style: TextStyle(
+                  fontFamily: 'inter',
+                  fontWeight: FontWeight.w400,
+                  fontSize: 16,
+                  color: AppColor.whiteSoft),
             ),
-            body: ListView(
-              shrinkWrap: true,
-              physics: const BouncingScrollPhysics(),
-              children: [
-                // Section 1 - Profile Picture Wrapper
-                Container(
-                  color: AppColor.primary,
-                  padding: const EdgeInsets.symmetric(vertical: 24),
-                  child: GestureDetector(
-                    onTap: _pickImage,
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        // Container(
-                        //   width: 130,
-                        //   height: 130,
-                        //   margin: const EdgeInsets.only(bottom: 15),
-                        //   decoration: BoxDecoration(
-                        //     color: Colors.grey,
-                        //     borderRadius: BorderRadius.circular(100),
-                        //     // Profile Picture
-                        //     image: DecorationImage(
-                        //         image: NetworkImage(),
-                        //         fit: BoxFit.cover),
-                        //   ),
-                        // ),
-                        CircleAvatar(
-                          radius: 65,
-                          // foregroundImage: userData['image_url'] != null ? NetworkImage(userData['image_url']) : FileImage(_pickedImageFile!),
-                          foregroundImage: NetworkImage(userData['image_url']),
-                        ),
-                        const SizedBox(height: 15),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Text('Change Profile Picture',
-                                style: TextStyle(
-                                    fontFamily: 'inter',
-                                    fontWeight: FontWeight.w600,
-                                    color: Colors.white)),
-                            const SizedBox(width: 8),
-                            SvgPicture.asset('assets/icons/camera.svg',
-                                color: Colors.white),
-                          ],
-                        )
-                      ],
-                    ),
-                  ),
-                ),
-                // Section 2 - User Info Wrapper
-                Container(
-                  margin: const EdgeInsets.only(top: 24),
-                  width: MediaQuery.of(context).size.width,
+          ),
+          body: ListView(
+            shrinkWrap: true,
+            physics: const BouncingScrollPhysics(),
+            children: [
+              // Section 1 - Profile Picture Wrapper
+              Container(
+                color: AppColor.primary,
+                padding: const EdgeInsets.symmetric(vertical: 24),
+                child: GestureDetector(
+                  onTap: _pickImage,
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      UserInfoTile(
-                        margin: const EdgeInsets.only(bottom: 16),
-                        label: 'Email',
-                        value: userData['email'],
+                      CircleAvatar(
+                        radius: 65,
+                        foregroundImage: NetworkImage(userData['image_url']),
                       ),
-                      UserInfoTile(
-                        margin: const EdgeInsets.only(bottom: 16),
-                        label: 'Full Name',
-                        value: userData['name'],
-                      ),
-                      UserInfoTile(
-                        margin: const EdgeInsets.only(bottom: 16),
-                        label: 'Subscription Type',
-                        value: 'Premium Subscription',
-                        valueBackground: AppColor.secondary,
-                      ),
-                      const UserInfoTile(
-                        margin: EdgeInsets.only(bottom: 16),
-                        label: 'Subscription Time',
-                        value: 'Until 22 Oct 2021',
-                      ),
-                      Container(
-                        margin: const EdgeInsets.only(
-                            top: 32, bottom: 6, left: 20, right: 20),
-                        width: MediaQuery.of(context).size.width,
-                        height: 60,
-                        child: ElevatedButton(
-                          onPressed: _logout,
-                          // () {
-                          //   Navigator.of(context).pop();
-                          //   Navigator.of(context).pushReplacement(
-                          //       MaterialPageRoute(
-                          //           builder: (context) => const PageSwitcher()));
-                          // },
-                          style: ElevatedButton.styleFrom(
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10)),
-                            backgroundColor: AppColor.warning,
-                          ),
-                          child: Text('Logout',
+                      const SizedBox(height: 15),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Text('Change Profile Picture',
                               style: TextStyle(
-                                  color: AppColor.primaryExtraSoft,
-                                  fontSize: 16,
+                                  fontFamily: 'inter',
                                   fontWeight: FontWeight.w600,
-                                  fontFamily: 'inter')),
-                        ),
-                      ),
+                                  color: Colors.white)),
+                          const SizedBox(width: 8),
+                          SvgPicture.asset('assets/icons/camera.svg',
+                              color: Colors.white),
+                        ],
+                      )
                     ],
                   ),
-                )
-              ],
-            ),
-          );
-        });
+                ),
+              ),
+              // Section 2 - User Info Wrapper
+              Container(
+                margin: const EdgeInsets.only(top: 24),
+                width: MediaQuery.of(context).size.width,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    UserInfoTile(
+                      margin: const EdgeInsets.only(bottom: 16),
+                      label: 'Email',
+                      value: userData['email'],
+                    ),
+                    UserInfoTile(
+                      margin: const EdgeInsets.only(bottom: 16),
+                      label: 'Full Name',
+                      value: userData['name'],
+                    ),
+                    UserInfoTile(
+                      margin: const EdgeInsets.only(bottom: 16),
+                      label: 'Subscription Type',
+                      value: 'Premium Subscription',
+                      valueBackground: AppColor.secondary,
+                    ),
+                    const UserInfoTile(
+                      margin: EdgeInsets.only(bottom: 16),
+                      label: 'Subscription Time',
+                      value: 'Until 22 Oct 2021',
+                    ),
+                    Container(
+                      margin: const EdgeInsets.only(
+                          top: 32, bottom: 6, left: 20, right: 20),
+                      width: MediaQuery.of(context).size.width,
+                      height: 60,
+                      child: ElevatedButton(
+                        onPressed: _logout,
+                        style: ElevatedButton.styleFrom(
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10)),
+                          backgroundColor: AppColor.warning,
+                        ),
+                        child: Text(
+                          'Logout',
+                          style: TextStyle(
+                            color: AppColor.primaryExtraSoft,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            fontFamily: 'inter',
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              )
+            ],
+          ),
+        );
+      },
+    );
   }
 }

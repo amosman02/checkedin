@@ -17,6 +17,19 @@ class _SearchPageState extends State<SearchPage> {
   var searchedBooking = [];
   var searchNotFound = false;
   var isSearching = false;
+  FocusNode focusNode = FocusNode();
+
+  @override
+  void initState() {
+    super.initState();
+    focusNode.requestFocus();
+  }
+
+  @override
+  void dispose() {
+    focusNode.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -97,6 +110,7 @@ class _SearchPageState extends State<SearchPage> {
                               borderRadius: BorderRadius.circular(10),
                               color: AppColor.primarySoft),
                           child: TextField(
+                            focusNode: focusNode,
                             controller: searchInputController,
                             onSubmitted: submit,
                             style: const TextStyle(
@@ -207,6 +221,7 @@ class _SearchPageState extends State<SearchPage> {
                 destinationCountry: searchedBooking[0]['destination_country'],
                 flightDurationTime: searchedBooking[0]['flight_duration_time'],
                 name: searchedBooking[0]['name'],
+                bookingReference: searchInputController.text,
               ),
             ),
         ],

@@ -3,29 +3,26 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:checkedin/models/core/recipe.dart';
 import 'package:checkedin/models/helper/recipe_helper.dart';
-import 'package:checkedin/views/screens/delicious_today_page.dart';
-// import 'package:checkedin/views/screens/newly_posted_page.dart';
 import 'package:checkedin/views/screens/profile_page.dart';
 import 'package:checkedin/views/screens/search_page.dart';
 import 'package:checkedin/views/utils/AppColor.dart';
 import 'package:checkedin/views/widgets/custom_app_bar.dart';
 import 'package:checkedin/views/widgets/dummy_search_bar.dart';
-import 'package:checkedin/views/widgets/featured_recipe_card.dart';
-// import 'package:checkedin/views/widgets/recipe_tile.dart';
-// import 'package:checkedin/views/widgets/recommendation_recipe_card.dart';
+import 'package:checkedin/views/widgets/booking_history_card.dart';
+import 'package:iconly/iconly.dart';
 
 class HomePage extends StatelessWidget {
   final List<Recipe> featuredRecipe = RecipeHelper.featuredRecipe;
-  final List<Recipe> recommendationRecipe = RecipeHelper.recommendationRecipe;
-  final List<Recipe> newlyPostedRecipe = RecipeHelper.newlyPostedRecipe;
 
   HomePage({super.key});
   @override
   Widget build(BuildContext context) {
     return StreamBuilder(
       stream: FirebaseFirestore.instance
-          .collection('users')
+          .collection('users_history')
           .doc(FirebaseAuth.instance.currentUser!.uid)
+          .collection('booking_details')
+          .orderBy('submission_date', descending: true)
           .snapshots(),
       builder: (ctx, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
@@ -44,7 +41,8 @@ class HomePage extends StatelessWidget {
           );
         }
 
-        final userData = snapshot.data!;
+        final hasHistory = snapshot.data!.docs.isNotEmpty;
+        final previousBookings = snapshot.data!.docs;
 
         return Scaffold(
           appBar: CustomAppBar(
@@ -56,7 +54,6 @@ class HomePage extends StatelessWidget {
               ),
             ),
             showProfilePhoto: true,
-            profilePhoto: NetworkImage(userData['image_url']),
             profilePhotoOnPressed: () {
               Navigator.of(context).push(
                   MaterialPageRoute(builder: (context) => const ProfilePage()));
@@ -66,14 +63,12 @@ class HomePage extends StatelessWidget {
             shrinkWrap: true,
             physics: const BouncingScrollPhysics(),
             children: [
-              // Section 1 - Featured Recipe - Wrapper
               Container(
                 height: 350,
                 color: Colors.white,
                 child: Stack(
                   children: [
                     Container(
-                      height: 245,
                       color: AppColor.primary,
                     ),
                     // Section 1 - Content
@@ -86,151 +81,84 @@ class HomePage extends StatelessWidget {
                                 builder: (context) => const SearchPage()));
                           },
                         ),
-                        // Delicious Today - Header
                         Container(
                           margin: const EdgeInsets.only(top: 12),
                           padding: const EdgeInsets.symmetric(horizontal: 16),
                           width: MediaQuery.of(context).size.width,
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              const Text(
-                                'History',
-                                style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w600,
-                                    fontFamily: 'inter'),
-                              ),
-                              TextButton(
-                                onPressed: () {
-                                  Navigator.of(context).push(MaterialPageRoute(
-                                      builder: (context) =>
-                                          DeliciousTodayPage()));
-                                },
-                                style: TextButton.styleFrom(
-                                    backgroundColor: Colors.white,
-                                    textStyle: const TextStyle(
-                                        fontWeight: FontWeight.w400,
-                                        fontSize: 14)),
-                                child: const Text('see all'),
-                              ),
-                            ],
+                          child: const Text(
+                            'History',
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                                fontFamily: 'inter'),
                           ),
                         ),
-                        // Delicious Today - ListView
+                        const SizedBox(height: 10),
                         Container(
                           margin: const EdgeInsets.only(top: 4),
                           height: 220,
-                          child: ListView.separated(
-                            itemCount: featuredRecipe.length,
-                            padding: const EdgeInsets.symmetric(horizontal: 16),
-                            physics: const BouncingScrollPhysics(),
-                            shrinkWrap: true,
-                            scrollDirection: Axis.horizontal,
-                            separatorBuilder: (context, index) {
-                              return const SizedBox(
-                                width: 16,
-                              );
-                            },
-                            itemBuilder: (context, index) {
-                              return FeaturedRecipeCard(
-                                  data: featuredRecipe[index]);
-                            },
-                          ),
+                          child: hasHistory
+                              ? ListView.separated(
+                                  itemCount: previousBookings.length,
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 16),
+                                  physics: const BouncingScrollPhysics(),
+                                  shrinkWrap: true,
+                                  scrollDirection: Axis.horizontal,
+                                  separatorBuilder: (context, index) {
+                                    return const SizedBox(width: 16);
+                                  },
+                                  itemBuilder: (context, index) {
+                                    return BookingHistoryCard(
+                                        data: previousBookings[index]);
+                                  },
+                                )
+                              : Text(
+                                  'No previous history',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
+                                    fontFamily: 'inter',
+                                    color: AppColor.whiteSoft,
+                                  ),
+                                ),
                         ),
                       ],
                     )
                   ],
                 ),
               ),
-              // Section 2 - Recommendation Recipe
-              // Container(
-              //   margin: const EdgeInsets.only(top: 16),
-              //   child: Column(
-              //     crossAxisAlignment: CrossAxisAlignment.start,
-              //     children: [
-              //       // Header
-              //       Container(
-              //         margin: const EdgeInsets.only(bottom: 16),
-              //         padding: const EdgeInsets.symmetric(horizontal: 16),
-              //         child: const Text(
-              //           'Today recomendation based on your taste...',
-              //           style: TextStyle(color: Colors.grey),
-              //         ),
-              //       ),
-              //       // Content
-              //       SizedBox(
-              //         height: 174,
-              //         child: ListView.separated(
-              //           shrinkWrap: true,
-              //           physics: const BouncingScrollPhysics(),
-              //           scrollDirection: Axis.horizontal,
-              //           itemCount: recommendationRecipe.length,
-              //           padding: const EdgeInsets.symmetric(horizontal: 16),
-              //           separatorBuilder: (context, index) {
-              //             return const SizedBox(width: 16);
-              //           },
-              //           itemBuilder: (context, index) {
-              //             return RecommendationRecipeCard(
-              //                 data: recommendationRecipe[index]);
-              //           },
-              //         ),
-              //       )
-              //     ],
-              //   ),
-              // ),
-              // Section 3 - Newly Posted
-              // Container(
-              //   margin: const EdgeInsets.only(top: 14),
-              //   padding: const EdgeInsets.symmetric(horizontal: 16),
-              //   child: Column(
-              //     crossAxisAlignment: CrossAxisAlignment.start,
-              //     children: [
-              //       // Header
-              //       Row(
-              //         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              //         children: [
-              //           const Text(
-              //             'Newly Posted',
-              //             style: TextStyle(
-              //                 fontSize: 16,
-              //                 fontWeight: FontWeight.w600,
-              //                 fontFamily: 'inter'),
-              //           ),
-              //           TextButton(
-              //             onPressed: () {
-              //               Navigator.of(context).push(MaterialPageRoute(
-              //                   builder: (context) => NewlyPostedPage()));
-              //             },
-              //             style: TextButton.styleFrom(
-              //               // backgroundColor: Colors.black,
-              //               textStyle: const TextStyle(
-              //                 fontWeight: FontWeight.w400,
-              //                 fontSize: 14,
-              //               ),
-              //             ),
-              //             child: const Text('see all'),
-              //           ),
-              //         ],
-              //       ),
-              //       // Content
-              //       ListView.separated(
-              //         shrinkWrap: true,
-              //         itemCount: 3 ?? newlyPostedRecipe.length,
-              //         physics: const NeverScrollableScrollPhysics(),
-              //         separatorBuilder: (context, index) {
-              //           return const SizedBox(height: 16);
-              //         },
-              //         itemBuilder: (context, index) {
-              //           return RecipeTile(
-              //             data: newlyPostedRecipe[index],
-              //           );
-              //         },
-              //       ),
-              //     ],
-              //   ),
-              // )
+              const SizedBox(height: 10),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                margin: const EdgeInsets.only(top: 32, bottom: 6),
+                width: MediaQuery.of(context).size.width,
+                height: 60,
+                child: ElevatedButton.icon(
+                  onPressed: () {
+                    Navigator.of(context).push(MaterialPageRoute(
+                        builder: (context) => const SearchPage()));
+                  },
+                  style: ElevatedButton.styleFrom(
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10)),
+                    backgroundColor: AppColor.primarySoft,
+                  ),
+                  icon: Icon(
+                    IconlyBold.calendar,
+                    color: AppColor.whiteSoft,
+                  ),
+                  label: Text(
+                    'Book Your Next Reservation',
+                    style: TextStyle(
+                        color: AppColor.whiteSoft,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        fontFamily: 'inter'),
+                  ),
+                ),
+              ),
             ],
           ),
         );

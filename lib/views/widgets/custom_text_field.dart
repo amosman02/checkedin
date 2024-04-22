@@ -56,7 +56,7 @@ class CustomTextField extends StatelessWidget {
                 hintStyle: TextStyle(fontSize: 14, color: Colors.grey[400]),
                 contentPadding: const EdgeInsets.only(left: 16),
                 border: InputBorder.none,
-                errorStyle: TextStyle(height: 2),
+                errorStyle: const TextStyle(height: 2),
               ),
               validator: validator,
               onSaved: onSaved,

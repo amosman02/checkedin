@@ -1,6 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:checkedin/views/screens/page_switcher.dart';
 import 'package:checkedin/views/utils/AppColor.dart';
 import 'package:checkedin/views/widgets/custom_text_field.dart';
 
